@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 
 const EventList = ({ events }) => {
   //このEventListコンポーネントはrenderEvents関数が返してきた配列をulタグ要素に格納するだけの処理しかしてない
@@ -9,11 +10,14 @@ const EventList = ({ events }) => {
     //この式によってイベント一覧の日時の新しい順に表示することができる
     return eventArray.map((event) => (
       <li key={event.id}>
-        {event.event_date}
-        {" - "}
-        {event.event_type}
+        <Link to={`/events/${event.id}`}>
+          {event.event_date}
+          {" - "}
+          {event.event_type}
+        </Link>
       </li>
     ));
+    //   Linkコンポーネントを使ってeventに対してリンクを付与している
   };
 
   return (
