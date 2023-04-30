@@ -3,6 +3,7 @@ import Header from "./Header";
 import EventList from "./EventList";
 import { Routes, Route } from "react-router-dom";
 import Event from "./Event";
+import EventForm from "./EventForm";
 
 const Editor = () => {
   const [events, setEvents] = useState([]);
@@ -44,15 +45,16 @@ const Editor = () => {
         ) : (
           <>
             <EventList events={events} />
-
             <Routes>
+              <Route path="new" element={<EventForm />} />
               <Route path=":id" element={<Event events={events} />} />
             </Routes>
           </>
         )}
       </div>
     </>
-    // isErrorがtrueであればエラーメッセージ(Something went wrong. Check the console.)を表示し、
+    //   URLがnewにマッチするとEventFormコンポーネントがレンダリングされる
+    // isErrorがtrueであればエラーメッセージ(Something went wrong.Check the console.)を表示し、
     //isLoadingがtrueであれば「Loading...」と表示し、falseであれば<EventList events={events} />が実行される
     //別のReactコンポーネントである EventList コンポーネントを呼び出し、events を props として渡している
   );
