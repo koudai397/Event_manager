@@ -5,15 +5,13 @@ import { useParams } from "react-router-dom";
 const Event = ({ events }) => {
   const { id } = useParams();
   // URLからid(パラメータ)を取得する。
-  const event = events.find((e) => e.id ===const Event = ({ events }) => {
-  const { id } = useParams();
   const event = events.find((e) => e.id === Number(id));
   // 先程取得したidを利用して、Number(id)に等しい最初の要素を検索し、その結果をeventに代入している
   // Number関数は引数に与えられたものを数字に変換する
   // そして、その後、下のところでeventオブジェクトのプロパティを使って、ページに表示されるコンテンツ(event_date)などを表示している
 
   return (
-    <>
+    <div className="eventContainer">
       <h2>
         {event.event_date}
         {" - "}
@@ -39,7 +37,7 @@ const Event = ({ events }) => {
           <strong>Published:</strong> {event.published ? "yes" : "no"}
         </li>
       </ul>
-    </>
+    </div>
   );
 };
 // publishedは公開されていればtrue,されていなければfalse
