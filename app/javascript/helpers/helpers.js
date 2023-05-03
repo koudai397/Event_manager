@@ -1,3 +1,11 @@
+export const formatDate = (d) => {
+  const YYYY = d.getFullYear();
+  const MM = `0${d.getMonth() + 1}`.slice(-2);
+  const DD = `0${d.getDate()}`.slice(-2);
+
+  return `${YYYY}-${MM}-${DD}`;
+};
+
 export const isEmptyObject = (obj) => Object.keys(obj).length === 0;
 //   ここでobj引数にformErrorsオブジェクトの値が入る。そして、そのオブジェクトの配列が空で無いかを確認している。
 
