@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "./Header";
 import EventList from "./EventList";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Event from "./Event";
 import EventForm from "./EventForm";
 
@@ -11,6 +11,8 @@ const Editor = () => {
   const [isLoading, setIsLoading] = useState(true);
   //この変数には真偽値が入っているのだが、レンダリングされるたびにtrueで初期化される。
   const [isError, setIsError] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,6 +37,30 @@ const Editor = () => {
     //定義したものを実行している
   }, []);
 
+  const addEvent = async (newEvent) => {
+    try {
+      const response = await window.fetch("/api/events", {
+        method: "POST",
+        body: JSON.stringify(newEvent),
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+      // postメソッドを送っており、JSON形式で
+      if (!response.ok) throw Error(response.statusText);
+      const savedEvent = await response.json();
+      const newEvents = [...events, savedEvent];
+      setEvents(newEvents);
+      // setEventsの配列に新しい要素を追加している
+      window.alert("Event Added!");
+      navigate(`/events/${savedEvent.id}`);
+      // 保存したイベントの詳細ページに遷移している。
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <>
       <Header />
@@ -46,7 +72,7 @@ const Editor = () => {
           <>
             <EventList events={events} />
             <Routes>
-              <Route path="new" element={<EventForm />} />
+              <Route path="new" element={<EventForm onSave={addEvent} />} />
               <Route path=":id" element={<Event events={events} />} />
             </Routes>
           </>

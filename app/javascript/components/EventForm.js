@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from "react";
 import Pikaday from "pikaday";
 import "pikaday/css/pikaday.css";
 import { formatDate, isEmptyObject, validateEvent } from "../helpers/helpers";
+import PropTypes from "prop-types";
 
-const EventForm = () => {
+const EventForm = ({ onSave }) => {
   const [event, setEvent] = useState({
     event_type: "",
     event_date: "",
@@ -16,6 +17,29 @@ const EventForm = () => {
   const [formErrors, setFormErrors] = useState({});
   const dateInput = useRef(null);
   // useRefを使ってdateInputを変更している
+
+  const updateEvent = (key, value) => {
+    setEvent((prevEvent) => ({ ...prevEvent, [key]: value }));
+  };
+  // この関数はsetEventを呼び出して、eventの値を更新している
+
+  useEffect(() => {
+    const p = new Pikaday({
+      field: dateInput.current,
+      onSelect: (date) => {
+        const formattedDate = formatDate(date);
+        dateInput.current.value = formattedDate;
+        updateEvent("event_date", formattedDate);
+        //   HTMLの要素のevent_dateに選択された値が入る
+        //fieldやonSelectというオプションを使っている。fieldは必須で、noSelectは選択可能。
+        // 選択された値(date)を受け取り、それをヘルパー関数のformatDateで年、月、日の状態にしている。dateInputを更新している。下のHTMLのところ。refを使って、
+      },
+    });
+
+    // クリーンアップ用の関数を返す
+    // Reactはアンマウントの前にこれを呼び出す
+    return () => p.destroy();
+  }, []);
 
   const handleInputChange = (e) => {
     //   この関数はフォームの入力値が変更されたときに呼び出される関数。
@@ -59,33 +83,9 @@ const EventForm = () => {
       setFormErrors(errors);
       // ここでisEmptyObject関数を使用して中身が空でない場合, つまりフォームにエラーがある場合は、setFormErrors関数でエラーを表示させている。
     } else {
-      console.log(event);
-      // 中身が空場合(エラーががない場合)は、コンソールにイベントを表示している
+      onSave(event);
     }
   };
-
-  useEffect(() => {
-    const p = new Pikaday({
-      field: dateInput.current,
-      onSelect: (date) => {
-        const formattedDate = formatDate(date);
-        dateInput.current.value = formattedDate;
-        updateEvent("event_date", formattedDate);
-        //   HTMLの要素のevent_dateに選択された値が入る
-        //fieldやonSelectというオプションを使っている。fieldは必須で、noSelectは選択可能。
-        // 選択された値(date)を受け取り、それをヘルパー関数のformatDateで年、月、日の状態にしている。dateInputを更新している。下のHTMLのところ。refを使って、
-      },
-    });
-
-    // クリーンアップ用の関数を返す
-    // Reactはアンマウントの前にこれを呼び出す
-    return () => p.destroy();
-  }, []);
-
-  const updateEvent = (key, value) => {
-    setEvent((prevEvent) => ({ ...prevEvent, [key]: value }));
-  };
-  // この関数はsetEventを呼び出して、eventの値を更新している
 
   return (
     <section>
@@ -173,3 +173,9 @@ const EventForm = () => {
 };
 
 export default EventForm;
+
+EventForm.propTypes = {
+  onSave: PropTypes.func.isRequired,
+};
+// ここでpropTypesを利用してEventFormコンポーネントにはonSaveという名前の関数が必須であるということを表してる。
+// isRequiredでonSave関数がない場合にReact側から警告が出るようにしている
