@@ -4,13 +4,14 @@ import EventList from "./EventList";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import Event from "./Event";
 import EventForm from "./EventForm";
+import { success } from "../helpers/notifications";
+import { handleAjaxError } from "../helpers/helpers";
 
 const Editor = () => {
   const [events, setEvents] = useState([]);
   //このeventsには配列が入っており、それをuseStateを使って初期化している
   const [isLoading, setIsLoading] = useState(true);
   //この変数には真偽値が入っているのだが、レンダリングされるたびにtrueで初期化される。
-  const [isError, setIsError] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,9 +25,7 @@ const Editor = () => {
         const data = await response.json();
         setEvents(data);
       } catch (error) {
-        setIsError(true);
-        //エラーを表すために初期値falseからtrueに変更している
-        console.error(error);
+        handleAjaxError(error);
       }
       //上のfetchDateの処理が終わってから実行される。falseにすることでデータの取得が終わったことを表す。
       setIsLoading(false);
@@ -52,11 +51,11 @@ const Editor = () => {
       const newEvents = [...events, savedEvent];
       setEvents(newEvents);
       // setEventsの配列に新しい要素を追加している
-      window.alert("Event Added!");
+      success("Event Added!");
       navigate(`/events/${savedEvent.id}`);
       // 保存したイベントの詳細ページに遷移している。
     } catch (error) {
-      console.error(error);
+      handleAjaxError(error);
     }
   };
 
@@ -72,13 +71,13 @@ const Editor = () => {
 
         if (!response.ok) throw Error(response.statusText);
 
-        window.alert("Event Deleted!");
+        success("Event Deleted!");
         navigate("/events");
         // イベント一覧ページに遷移する。
         setEvents(events.filter((event) => event.id !== eventId));
         // eventId に対応するイベントを events 配列から削除し、それ以外のイベントの配列を新しく生成して、events の state を更新している
       } catch (error) {
-        console.error(error);
+        handleAjaxError(error);
       }
     }
   };
@@ -87,7 +86,6 @@ const Editor = () => {
     <>
       <Header />
       <div className="grid">
-        {isError && <p>Something went wrong. Check the console.</p>}
         {isLoading ? (
           <p>Loading...</p>
         ) : (
