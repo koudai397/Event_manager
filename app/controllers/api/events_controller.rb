@@ -40,8 +40,7 @@ class Api::EventsController < ApplicationController
 
     def event_params
       params.require(:event).permit(
-
-         #paramsはRailsが提供してくれているメソッドで、この中にフロントから送られてくるデータ（ここでは、idやevent_typeなど）が格納されています。
+         #paramsはRailsが提供してくれているメソッド(ストロングパラーメータという)で、この中にフロントから送られてくるデータ（ここでは、idやevent_typeなど）が格納されています。
         #このrequireはeventというキーに対応するものをとってきて
         #permitで指定されている(id,event_typeなどの)キーのついた値だけを取得する。こうすることでセキュリティを保護することができる。
         :id,
