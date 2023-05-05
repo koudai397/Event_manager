@@ -11,7 +11,6 @@ const Editor = () => {
   const [isLoading, setIsLoading] = useState(true);
   //この変数には真偽値が入っているのだが、レンダリングされるたびにtrueで初期化される。
   const [isError, setIsError] = useState(false);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,6 +60,29 @@ const Editor = () => {
     }
   };
 
+  const deleteEvent = async (eventId) => {
+    const sure = window.confirm("Are you sure?");
+
+    if (sure) {
+      try {
+        const response = await window.fetch(`/api/events/${eventId}`, {
+          method: "DELETE",
+        });
+        // ここで指定されたidのイベントを削除する
+
+        if (!response.ok) throw Error(response.statusText);
+
+        window.alert("Event Deleted!");
+        navigate("/events");
+        // イベント一覧ページに遷移する。
+        setEvents(events.filter((event) => event.id !== eventId));
+        // eventId に対応するイベントを events 配列から削除し、それ以外のイベントの配列を新しく生成して、events の state を更新している
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
   return (
     <>
       <Header />
@@ -73,7 +95,10 @@ const Editor = () => {
             <EventList events={events} />
             <Routes>
               <Route path="new" element={<EventForm onSave={addEvent} />} />
-              <Route path=":id" element={<Event events={events} />} />
+              <Route
+                path=":id"
+                element={<Event events={events} onDelete={deleteEvent} />}
+              />
             </Routes>
           </>
         )}
