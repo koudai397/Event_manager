@@ -3,16 +3,25 @@ import Pikaday from "pikaday";
 import "pikaday/css/pikaday.css";
 import { formatDate, isEmptyObject, validateEvent } from "../helpers/helpers";
 import PropTypes from "prop-types";
+import { useParams } from "react-router-dom";
+import { render } from "react-dom";
 
 const EventForm = ({ onSave }) => {
-  const [event, setEvent] = useState({
+  const { id } = useParams();
+
+  const defaults = {
     event_type: "",
     event_date: "",
     title: "",
     speaker: "",
     host: "",
     published: false,
-  });
+  };
+
+  const currEvent = id ? events.find((e) => e.id === Number(id)) : {};
+  const initialEventState = { ...defaults, ...currEvent };
+  const [event, setEvent] = useState(initialEventState);
+  // URLからidに対応するイベント情報をフォームに入力している。ない場合は、defaultsの情報をフォームに入力する。
 
   const [formErrors, setFormErrors] = useState({});
   const dateInput = useRef(null);
@@ -26,20 +35,27 @@ const EventForm = ({ onSave }) => {
   useEffect(() => {
     const p = new Pikaday({
       field: dateInput.current,
+      toString: (date) => formatDate(date),
       onSelect: (date) => {
         const formattedDate = formatDate(date);
         dateInput.current.value = formattedDate;
         updateEvent("event_date", formattedDate);
         //   HTMLの要素のevent_dateに選択された値が入る
         //fieldやonSelectというオプションを使っている。fieldは必須で、noSelectは選択可能。
-        // 選択された値(date)を受け取り、それをヘルパー関数のformatDateで年、月、日の状態にしている。dateInputを更新している。下のHTMLのところ。refを使って、
+        // 選択された値(date)を受け取り、それをヘルパー関数のformatDateで年、月、日の状態にしている。dateInputを更新している。
       },
     });
 
     // クリーンアップ用の関数を返す
     // Reactはアンマウントの前にこれを呼び出す
     return () => p.destroy();
+    // これをしないと、Pikadayのインスタンスが残り続け、アプリのパフォーマンスに影響がでる。
   }, []);
+
+  useEffect(() => {
+    setEvent(initialEventState);
+  }, [events]);
+  // eventsが変更された場合に、initialEventStateで状態を更新する。（ユーザーがイベントを編集中に「New Event」をクリックしたらフィールドがクリアされるようにする処理）
 
   const handleInputChange = (e) => {
     //   この関数はフォームの入力値が変更されたときに呼び出される関数。
@@ -54,16 +70,17 @@ const EventForm = ({ onSave }) => {
 
   const renderErrors = () => {
     if (isEmptyObject(formErrors)) {
-      // formErrorsが空でないか確認している
+      // formErrorsが空だった場合nullを返す。
       return null;
     }
 
     return (
+      // formErrorsにエラーが含まれている場合、以下を返す。
       <div className="errors">
         <h3>The following errors prohibited the event from being saved:</h3>
         <ul>
           {Object.values(formErrors).map((formError) => (
-            //   Object.values()で配列を返している。
+            //   Object.values()で配列にアクセス。
             //   mapメソッドをつかい、formErrors配列から一つづつ取り出して、liタグを各要素に付与して表示さしている
             <li key={formError}>{formError}</li>
           ))}
@@ -88,10 +105,10 @@ const EventForm = ({ onSave }) => {
   };
 
   return (
-    <section>
-      {renderErrors()}
-
+    <div>
       <h2>New Event</h2>
+      {renderErrors()}
+      {/* エラーがあれば表示される */}
       <form className="eventForm" onSubmit={handleSubmit}>
         {/* ここで送信されたときに、先程定義したhandleSubmitを呼び出すようにしている */}
         <div>
@@ -102,8 +119,10 @@ const EventForm = ({ onSave }) => {
               id="event_type"
               name="event_type"
               onChange={handleInputChange}
+              value={event.event_type}
             />
           </label>
+          {/* 値を更新するたびに、handleInputChangeが呼び出される */}
           {/* このhtmlForで指定した要素とinputのidを一致させることで関連付けをしている。labelをクリックすることによって、自動的にフォームに移動するようになっている。以下で同じことをしている↓ */}
         </div>
         <div>
@@ -115,6 +134,8 @@ const EventForm = ({ onSave }) => {
               name="event_date"
               ref={dateInput}
               autoComplete="off"
+              value={event.event_date}
+              onChange={handleInputChange}
             />
           </label>
         </div>
@@ -127,6 +148,7 @@ const EventForm = ({ onSave }) => {
               id="title"
               name="title"
               onChange={handleInputChange}
+              value={event.title}
             />
           </label>
         </div>
@@ -138,6 +160,7 @@ const EventForm = ({ onSave }) => {
               id="speaker"
               name="speaker"
               onChange={handleInputChange}
+              value={event.speaker}
             />
           </label>
         </div>
@@ -149,6 +172,7 @@ const EventForm = ({ onSave }) => {
               id="host"
               name="host"
               onChange={handleInputChange}
+              value={event.host}
             />
           </label>
         </div>
@@ -160,6 +184,7 @@ const EventForm = ({ onSave }) => {
               id="published"
               name="published"
               onChange={handleInputChange}
+              checked={event.published}
             />
           </label>
         </div>
@@ -168,14 +193,29 @@ const EventForm = ({ onSave }) => {
         </div>
         {/* type="submit"が指定されているボタンなので、↑form 要素の onSubmit ハンドラが呼び出されます */}
       </form>
-    </section>
+    </div>
   );
 };
 
 export default EventForm;
 
 EventForm.propTypes = {
+  events: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      event_type: PropTypes.string.isRequired,
+      event_date: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      speaker: PropTypes.string.isRequired,
+      host: PropTypes.string.isRequired,
+      published: PropTypes.bool.isRequired,
+    })
+  ),
   onSave: PropTypes.func.isRequired,
 };
-// ここでpropTypesを利用してEventFormコンポーネントにはonSaveという名前の関数が必須であるということを表してる。
-// isRequiredでonSave関数がない場合にReact側から警告が出るようにしている
+// ここで、各要素にそれぞれのプロパティが必須であることを示している。
+EventForm.defaultProps = {
+  events: [],
+};
+// EventFormコンポーネントにeventsが渡されなかったときに、デフォルト値として空の配列を渡す。
+// また、上で定義された型チェックに失敗したときに実行される

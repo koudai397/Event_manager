@@ -1,10 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 const Event = ({ events, onDelete }) => {
   const { id } = useParams();
-  // URLからid(パラメータ)を取得する。
+  // URLからeventのid(パラメータ)を取得する。
   const event = events.find((e) => e.id === Number(id));
   // 先程取得したidを利用して、Number(id)に等しい最初の要素を検索し、その結果をeventに代入している
   // Number関数は引数に与えられたものを数字に変換する
@@ -16,6 +16,7 @@ const Event = ({ events, onDelete }) => {
         {event.event_date}
         {" - "}
         {event.event_type}
+        <Link to={`/events/${event.id}/edit`}>Edit</Link>
         <button
           className="delete"
           type="button"

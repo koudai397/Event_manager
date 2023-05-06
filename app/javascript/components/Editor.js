@@ -82,6 +82,33 @@ const Editor = () => {
     }
   };
 
+  const updateEvent = async (updatedEvent) => {
+    try {
+      const response = await window.fetch(`/api/events/${updatedEvent.id}`, {
+        method: "PUT",
+        body: JSON.stringify(updatedEvent),
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+      // 指定されたイベントの要素を更新するためにJSON形式でサーバー側に送信している。
+
+      if (!response.ok) throw Error(response.statusText);
+
+      const newEvents = events;
+      const idx = newEvents.findIndex((event) => event.id === updatedEvent.id);
+      newEvents[idx] = updatedEvent;
+      setEvents(newEvents);
+      // ここですべてのeventsの値を更新している。
+      success("Event Updated!");
+      navigate(`/events/${updatedEvent.id}`);
+      // navigate関数はページを遷移するために使われる。
+    } catch (error) {
+      handleAjaxError(error);
+    }
+  };
+
   return (
     <>
       <Header />
@@ -92,20 +119,23 @@ const Editor = () => {
           <>
             <EventList events={events} />
             <Routes>
-              <Route path="new" element={<EventForm onSave={addEvent} />} />
               <Route
                 path=":id"
                 element={<Event events={events} onDelete={deleteEvent} />}
               />
+              <Route
+                path=":id/edit"
+                element={<EventForm events={events} onSave={updateEvent} />}
+              />
+              <Route path="new" element={<EventForm onSave={addEvent} />} />
             </Routes>
           </>
         )}
       </div>
     </>
+    // ここでURLの値が3つのうちどれかにマッチしたときにそのページに遷移する
+
     //   URLがnewにマッチするとEventFormコンポーネントがレンダリングされる
-    // isErrorがtrueであればエラーメッセージ(Something went wrong.Check the console.)を表示し、
-    //isLoadingがtrueであれば「Loading...」と表示し、falseであれば<EventList events={events} />が実行される
-    //別のReactコンポーネントである EventList コンポーネントを呼び出し、events を props として渡している
   );
 };
 
