@@ -1,25 +1,32 @@
-import React, { useState, useRef, useEffect } from "react";
 import Pikaday from "pikaday";
 import "pikaday/css/pikaday.css";
-import { formatDate, isEmptyObject, validateEvent } from "../helpers/helpers";
 import PropTypes from "prop-types";
 import { useParams } from "react-router-dom";
-import { render } from "react-dom";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { formatDate, isEmptyObject, validateEvent } from "../helpers/helpers";
 
-const EventForm = ({ onSave }) => {
+const EventForm = ({ events, onSave }) => {
   const { id } = useParams();
 
-  const defaults = {
-    event_type: "",
-    event_date: "",
-    title: "",
-    speaker: "",
-    host: "",
-    published: false,
-  };
+  const initialEventState = useCallback(() => {
+    // useCallbackを使い、関数をキャッシュすることでパフォーマンスを向上させる
+    const defaults = {
+      event_type: "",
+      event_date: "",
+      title: "",
+      speaker: "",
+      host: "",
+      published: false,
+    };
 
-  const currEvent = id ? events.find((e) => e.id === Number(id)) : {};
-  const initialEventState = { ...defaults, ...currEvent };
+    const currEvent = id ? events.find((e) => e.id === Number(id)) : {};
+    // events配列からidが一致するイベントを探し出している
+
+    return { ...defaults, ...currEvent };
+    // オブジェクトの更新をしている
+  }, [events, id]);
+  // このようにuseCallback関数でラップすることによって、eventsとidが変更された場合にだけ関数が再計算され、もともとあった関数がキャッシュされパフォーマンスがよくなる。
+
   const [event, setEvent] = useState(initialEventState);
   // URLからidに対応するイベント情報をフォームに入力している。ない場合は、defaultsの情報をフォームに入力する。
 
