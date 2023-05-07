@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { useParams, Link } from "react-router-dom";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { formatDate, isEmptyObject, validateEvent } from "../helpers/helpers";
+import EventNotFound from "./EventNotFound";
 
 const EventForm = ({ events, onSave }) => {
   const { id } = useParams();
@@ -80,6 +81,8 @@ const EventForm = ({ events, onSave }) => {
       // formErrorsが空だった場合nullを返す。
       return null;
     }
+
+    if (id && !event.id) return <EventNotFound />;
 
     return (
       // formErrorsにエラーが含まれている場合、以下を返す。

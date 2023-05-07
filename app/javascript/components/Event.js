@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { useParams, Link } from "react-router-dom";
+import EventNotFound from "./EventNotFound";
 
 const Event = ({ events, onDelete }) => {
   const { id } = useParams();
@@ -9,6 +10,7 @@ const Event = ({ events, onDelete }) => {
   // 先程取得したidを利用して、Number(id)に等しい最初の要素を検索し、その結果をeventに代入している
   // Number関数は引数に与えられたものを数字に変換する
   // そして、その後、下のところでeventオブジェクトのプロパティを使って、ページに表示されるコンテンツ(event_date)などを表示している
+  if (!event) return <EventNotFound />;
 
   return (
     <div className="eventContainer">
