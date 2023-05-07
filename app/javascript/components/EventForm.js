@@ -1,7 +1,7 @@
 import Pikaday from "pikaday";
 import "pikaday/css/pikaday.css";
 import PropTypes from "prop-types";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { formatDate, isEmptyObject, validateEvent } from "../helpers/helpers";
 
@@ -111,9 +111,16 @@ const EventForm = ({ events, onSave }) => {
     }
   };
 
+  const cancelURL = event.id ? `/events/${event.id}` : "/events";
+  // URLにidがあればその詳細ページに遷移して、idがない場合は一覧ページに遷移する
+  const title = event.id
+    ? `${event.event_date} - ${event.event_type}`
+    : "New Event";
+  // idによっとタイトルを変更する
+
   return (
     <div>
-      <h2>New Event</h2>
+      <h2>{title}</h2>
       {renderErrors()}
       {/* エラーがあれば表示される */}
       <form className="eventForm" onSubmit={handleSubmit}>
@@ -197,8 +204,8 @@ const EventForm = ({ events, onSave }) => {
         </div>
         <div className="form-actions">
           <button type="submit">Save</button>
+          <Link to={cancelURL}>Cancel</Link>
         </div>
-        {/* type="submit"が指定されているボタンなので、↑form 要素の onSubmit ハンドラが呼び出されます */}
       </form>
     </div>
   );
