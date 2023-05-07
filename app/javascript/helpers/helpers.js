@@ -11,6 +11,9 @@ export const formatDate = (d) => {
 export const isEmptyObject = (obj) => Object.keys(obj).length === 0;
 //   ここでobj引数にformErrorsオブジェクトの値が入る。そして、そのオブジェクトの配列が空で無いかを確認している。
 
+const isValidDate = (dateObj) => !Number.isNaN(Date.parse(dateObj));
+// Date.parseは与えられた文字列を1970年1月1日午前0時（UTC）からの経過ミリ秒数に変換する。それをチェックして、trueかfalseをisValidDateに格納している
+
 export const validateEvent = (event) => {
   //hundleSubumit関数のなかで呼ばれている。フォームを送信したときにエラーがないかバリデーションチェックをしている
   const errors = {};
@@ -31,6 +34,10 @@ export const validateEvent = (event) => {
   if (event.host === "") {
     errors.host = "You must enter at least one host";
   }
+  if (!isValidDate(event.event_date)) {
+    errors.event_date = "You must enter a valid date";
+  }
+  // event_dataが有効でない場合にエラーを表示する
   return errors;
 };
 
